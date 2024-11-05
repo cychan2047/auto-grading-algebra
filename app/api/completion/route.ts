@@ -1,6 +1,18 @@
 import { streamText, StreamingTextResponse } from "ai";
 import { isSupportedImageType } from "@/app/utils";
-import { anthropic } from "@ai-sdk/anthropic";
+import { google } from "@ai-sdk/google";
+
+const prompt_task = `
+  You are given an image of a handwritten answer of a middle school algebra question from a middle school student. 
+  In the answer there is some irrelevant words that could be in any language or some deleted expressions. 
+
+  Please do the following: 
+  1. Recognize the original problem and the type of the problem. 
+  2. Recognize the expressions in each step and its correctness. 
+  3. Justify if the final answer is correct. 
+  4. Generate a rubrics with 5 total points for this question. 
+  5. Justify how many points will you award each item in the rubrics and calculate the final score.
+`;
 
 export async function POST(req: Request) {
 	const { prompt } = await req.json();
@@ -31,7 +43,7 @@ export async function POST(req: Request) {
 				content: [
 					{
 						type: "text",
-						text: "Begin each of the following with a triangle symbol (▲ U+25B2): First, a brief description of the image to be used as alt text. Do not describe or extract text in the description. Second, the text extracted from the image, with newlines where applicable. Un-obstruct text if it is covered by something, to make it readable. If there is no text in the image, only respond with the description. Do not include any other information. Example: ▲ Lines of code in a text editor.▲ const x = 5; const y = 10; const z = x + y; console.log(z);",
+						text: prompt_task,
 					},
 					{
 						type: "image",
@@ -50,8 +62,7 @@ export async function POST(req: Request) {
 				],
 			},
 		],
-		model: anthropic("claude-3-haiku-20240307"),
-		maxTokens: 300,
+		model: google("models/gemini-1.5-pro-latest"),
 	});
 
 	return new StreamingTextResponse(result.toAIStream());
