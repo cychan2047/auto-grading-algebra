@@ -63,6 +63,8 @@ export async function POST(req: Request) {
 			},
 		],
 		model: google("models/gemini-1.5-pro-latest"),
+		maxTokens: 4000,
+		temperature: 0,
 	});
 
 	return new StreamingTextResponse(result.toAIStream());
